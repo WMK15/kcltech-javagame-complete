@@ -3,18 +3,28 @@ package uk.ac.kcltech.sandbox;
 import static uk.ac.kcltech.sandbox.GameConfig.*;
 
 public final class World {
-    public enum Tile { AIR, DIRT, GRASS }
+    public enum Tile { AIR, DIRT, GRASS, STONE, WOOD }
 
     private final Tile[][] tiles = new Tile[ROWS][COLUMNS];
 
     public World() {
         for (int row = 0; row < ROWS; row++) {
             for (int column = 0; column < COLUMNS; column++) {
-                int surface = 16 + (column % 17 == 10 ? 1 : 0);
+                int surface = surfaceRow(column);
                 tiles[row][column] = row < surface ? Tile.AIR :
-                        row == surface ? Tile.GRASS : Tile.DIRT;
+                        row == surface ? Tile.GRASS :
+                        row < surface + 2 ? Tile.DIRT : Tile.STONE;
             }
         }
+        for (int firstColumn = 7; firstColumn < COLUMNS; firstColumn += 16) {
+            for (int column = firstColumn; column < Math.min(firstColumn + 3, COLUMNS); column++) {
+                tiles[surfaceRow(column) - 1][column] = Tile.WOOD;
+            }
+        }
+    }
+
+    private static int surfaceRow(int column) {
+        return 16 + (column % 17 == 10 ? 1 : 0);
     }
 
     public Tile get(int column, int row) {
@@ -28,15 +38,17 @@ public final class World {
         return get(column, row) != Tile.AIR;
     }
 
-    public boolean mine(int column, int row) {
-        if (!inside(column, row) || tiles[row][column] == Tile.AIR) return false;
+    public Tile mine(int column, int row) {
+        if (!inside(column, row)) return Tile.AIR;
+        Tile mined = tiles[row][column];
         tiles[row][column] = Tile.AIR;
-        return true;
+        return mined;
     }
 
-    public boolean place(int column, int row) {
-        if (!inside(column, row) || tiles[row][column] != Tile.AIR) return false;
-        tiles[row][column] = Tile.DIRT;
+    public boolean place(int column, int row, Tile tile) {
+        if (tile == null || tile == Tile.AIR || !inside(column, row)
+                || tiles[row][column] != Tile.AIR) return false;
+        tiles[row][column] = tile;
         return true;
     }
 

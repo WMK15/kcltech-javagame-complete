@@ -13,7 +13,9 @@ import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static uk.ac.kcltech.sandbox.GameConfig.*;
@@ -26,23 +28,40 @@ public final class SandboxGame extends Application {
     private double lastRenderedPlayerX = Double.NaN;
     private final Player player = new Player();
     private final Inventory inventory = new Inventory();
-    private final Enemy enemy = new Enemy(18 * TILE);
+    private final List<Enemy> enemies = new ArrayList<>();
     private final Set<KeyCode> pressed = new HashSet<>();
+    private World.Tile selectedBlock = World.Tile.DIRT;
     private double cameraX;
-    private String status = "Mine 3 blocks, press E to craft a sword.";
+    private String status = "Mine 3 wood blocks, press E to craft a sword. Use 1/2/3 to select blocks.";
     private double statusSeconds = 5;
 
     @Override
     public void start(Stage stage) {
+        // Spread enemies across the map, leaving room near the player's spawn.
+        for (int i = 0; i < ENEMY_COUNT; i++) {
+            double column = 18 + i * (COLUMNS - 20.0) / ENEMY_COUNT;
+            Enemy enemy = new Enemy(column * TILE);
+            while (world.collides(enemy.x(), enemy.y(), Enemy.WIDTH, Enemy.HEIGHT)) {
+                column++;
+                enemy = new Enemy(column * TILE);
+            }
+            enemies.add(enemy);
+        }
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         Scene scene = new Scene(new StackPane(canvas));
         scene.setOnKeyPressed(event -> {
             pressed.add(event.getCode());
-            if (event.getCode() == KeyCode.E) {
-                if (inventory.craftSword()) notifyPlayer("Crafted a sword! Press F near the enemy.");
-                else notifyPlayer("Crafting requires 3 dirt and no existing sword.");
+            switch (event.getCode()) {
+                case DIGIT1, NUMPAD1 -> selectedBlock = World.Tile.DIRT;
+                case DIGIT2, NUMPAD2 -> selectedBlock = World.Tile.STONE;
+                case DIGIT3, NUMPAD3 -> selectedBlock = World.Tile.WOOD;
+                case E -> {
+                    if (inventory.craftSword()) notifyPlayer("Crafted a sword! Press F near an enemy.");
+                    else notifyPlayer("Crafting requires 3 wood and no existing sword.");
+                }
+                case F -> attack();
+                default -> { }
             }
-            if (event.getCode() == KeyCode.F) attack();
         });
         scene.setOnKeyReleased(event -> pressed.remove(event.getCode()));
         scene.setOnMousePressed(event -> {
@@ -57,14 +76,18 @@ public final class SandboxGame extends Application {
                 return;
             }
             if (event.getButton() == MouseButton.PRIMARY) {
-                if (world.mine(column, row)) inventory.collectDirt();
-            } else if (event.getButton() == MouseButton.SECONDARY && inventory.dirt() > 0) {
+                inventory.collect(world.mine(column, row));
+            } else if (event.getButton() == MouseButton.SECONDARY) {
+                if (inventory.count(selectedBlock) == 0) {
+                    notifyPlayer("No " + selectedBlock + " blocks left. Mine some first.");
+                    return;
+                }
                 boolean overlapsPlayer = Collision.overlaps(column * TILE, row * TILE, TILE, TILE,
                         player.x(), player.y(), Player.WIDTH, Player.HEIGHT);
-                boolean overlapsEnemy = enemy.alive() && Collision.overlaps(
-                        column * TILE, row * TILE, TILE, TILE, enemy.x(), enemy.y(), Enemy.WIDTH, Enemy.HEIGHT);
-                if (!overlapsPlayer && !overlapsEnemy && world.place(column, row)) {
-                    inventory.spendDirt();
+                boolean overlapsEnemy = enemies.stream().anyMatch(enemy -> enemy.alive() && Collision.overlaps(
+                        column * TILE, row * TILE, TILE, TILE, enemy.x(), enemy.y(), Enemy.WIDTH, Enemy.HEIGHT));
+                if (!overlapsPlayer && !overlapsEnemy && world.place(column, row, selectedBlock)) {
+                    inventory.spend(selectedBlock);
                 }
             }
         });
@@ -99,7 +122,9 @@ public final class SandboxGame extends Application {
         boolean jump = pressed.contains(KeyCode.SPACE) || pressed.contains(KeyCode.W) || pressed.contains(KeyCode.UP);
         player.update(world, dt, left, right, jump);
         elapsed += dt;
-        enemy.update(world, dt);
+        for (Enemy enemy : enemies) {
+            enemy.update(world, dt);
+        }
         statusSeconds = Math.max(0, statusSeconds - dt);
         cameraX = Math.max(0, Math.min(COLUMNS * TILE - WIDTH,
                 player.x() + Player.WIDTH / 2 - WIDTH / 2.0));
@@ -108,13 +133,23 @@ public final class SandboxGame extends Application {
     private void attack() {
         if (!player.canAttack()) return;
         player.attacked();
-        if (!enemy.alive()) return;
         double reachStart = player.facingRight() ? player.x() + Player.WIDTH : player.x() - 44;
-        if (Collision.overlaps(reachStart, player.y() - 4, 44, Player.HEIGHT + 8,
-                enemy.x(), enemy.y(), Enemy.WIDTH, Enemy.HEIGHT)) {
-            enemy.damage(inventory.hasSword() ? 3 : 1);
-            if (!enemy.alive()) notifyPlayer("Enemy defeated!");
+        int defeated = 0;
+        for (Enemy enemy : enemies) {
+            if (enemy.alive() && Collision.overlaps(reachStart, player.y() - 4, 44, Player.HEIGHT + 8,
+                    enemy.x(), enemy.y(), Enemy.WIDTH, Enemy.HEIGHT)) {
+                enemy.damage(inventory.hasSword() ? 3 : 1);
+                if (!enemy.alive()) defeated++;
+            }
         }
+        if (defeated > 0) {
+            long remaining = remainingEnemies();
+            notifyPlayer(remaining == 0 ? "All enemies defeated!" : "Enemy defeated! " + remaining + " remaining.");
+        }
+    }
+
+    private long remainingEnemies() {
+        return enemies.stream().filter(Enemy::alive).count();
     }
 
     private void render(GraphicsContext g) {
@@ -130,7 +165,13 @@ public final class SandboxGame extends Application {
             for (int column = firstColumn; column <= lastColumn; column++) {
                 World.Tile tile = world.get(column, row);
                 if (tile == World.Tile.AIR) continue;
-                Image texture = tile == World.Tile.GRASS ? art.grass() : art.dirt();
+                Image texture = switch (tile) {
+                    case GRASS -> art.grass();
+                    case DIRT -> art.dirt();
+                    case STONE -> art.stone();
+                    case WOOD -> art.wood();
+                    case AIR -> throw new IllegalStateException("Air has no block texture.");
+                };
                 g.drawImage(texture, column * TILE - cameraX, row * TILE, TILE, TILE);
             }
         }
@@ -147,25 +188,30 @@ public final class SandboxGame extends Application {
         g.drawImage(playerFrame, player.x() - cameraX, player.y(), Player.WIDTH, Player.HEIGHT);
         if (!player.facingRight()) g.restore();
 
-        if (enemy.alive()) {
+        for (Enemy enemy : enemies) {
+            if (!enemy.alive()) continue;
             g.drawImage(art.enemy(), enemy.x() - cameraX, enemy.y(), Enemy.WIDTH, Enemy.HEIGHT);
             g.setFill(Color.web("#7f1829"));
             g.fillRect(enemy.x() - cameraX, enemy.y() - 8, Enemy.WIDTH * enemy.health() / 3.0, 4);
         }
 
-        if (inventory.hasSword()) {
-            g.drawImage(art.sword(), 720, 13, 34, 34);
-        }
         g.setFill(Color.web("#101827", 0.86));
-        g.fillRoundRect(12, 12, 700, 76, 10, 10);
+        g.fillRoundRect(12, 12, WIDTH - 24, 100, 10, 10);
+        if (inventory.hasSword()) {
+            g.drawImage(art.sword(), WIDTH - 60, 22, 34, 34);
+        }
         g.setFill(Color.WHITE);
         g.setFont(Font.font("Monospaced", 15));
         g.fillText("A/D move | Space jump | Left click mine | Right click place", 24, 38);
-        g.fillText("E craft sword | F attack     Dirt: " + inventory.dirt() +
-                "     Sword: " + (inventory.hasSword() ? "yes" : "no"), 24, 65);
+        g.fillText("E craft sword (3 wood) | F attack | Sword: " + (inventory.hasSword() ? "yes" : "no") +
+                " | Enemies remaining: " + remainingEnemies(), 24, 65);
+        g.fillText("1 Dirt: " + inventory.count(World.Tile.DIRT) +
+                " | 2 Stone: " + inventory.count(World.Tile.STONE) +
+                " | 3 Wood: " + inventory.count(World.Tile.WOOD) +
+                " | Placing: " + selectedBlock, 24, 92);
         if (statusSeconds > 0) {
             g.setFill(Color.web("#101827", 0.80));
-            g.fillRoundRect(12, HEIGHT - 44, 680, 30, 8, 8);
+            g.fillRoundRect(12, HEIGHT - 44, WIDTH - 24, 30, 8, 8);
             g.setFill(Color.WHITE);
             g.fillText(status, 24, HEIGHT - 23);
         }

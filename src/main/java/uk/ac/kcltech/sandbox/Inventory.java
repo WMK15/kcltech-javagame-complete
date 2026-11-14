@@ -1,24 +1,48 @@
 package uk.ac.kcltech.sandbox;
 
-/** One resource, one recipe: three dirt blocks make a sword. */
+/** Three block resources, one recipe: three wood blocks make a sword. */
 public final class Inventory {
     private int dirt;
+    private int stone;
+    private int wood;
     private boolean sword;
 
-    public int dirt() { return dirt; }
     public boolean hasSword() { return sword; }
 
-    public void collectDirt() { dirt++; }
+    public int count(World.Tile material) {
+        if (material == null) return 0;
+        return switch (material) {
+            case DIRT, GRASS -> dirt;
+            case STONE -> stone;
+            case WOOD -> wood;
+            case AIR -> 0;
+        };
+    }
 
-    public boolean spendDirt() {
-        if (dirt == 0) return false;
-        dirt--;
+    public void collect(World.Tile material) {
+        if (material == null) return;
+        switch (material) {
+            case DIRT, GRASS -> dirt++;
+            case STONE -> stone++;
+            case WOOD -> wood++;
+            case AIR -> { }
+        }
+    }
+
+    public boolean spend(World.Tile material) {
+        if (material == null || count(material) == 0) return false;
+        switch (material) {
+            case DIRT -> dirt--;
+            case STONE -> stone--;
+            case WOOD -> wood--;
+            default -> { return false; }
+        }
         return true;
     }
 
     public boolean craftSword() {
-        if (sword || dirt < 3) return false;
-        dirt -= 3;
+        if (sword || wood < 3) return false;
+        wood -= 3;
         sword = true;
         return true;
     }

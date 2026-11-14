@@ -13,4 +13,4 @@ Two new simple pixel-art sprites are also dedicated CC0 1.0:
 
 Licence information: https://creativecommons.org/publicdomain/zero/1.0/
 
-The game renders the terrain, sky, player frames, enemy and sword. Five additional block textures are bundled for optional visual customisation, without expanding the required game mechanics.
+The game renders grass, dirt, stone and wood terrain, sky, player frames, enemy and sword. Sand, leaves and gold textures remain bundled for optional visual customisation.

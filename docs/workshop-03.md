@@ -6,17 +6,21 @@
 - Enemy classes and basic patrol movement
 
 ## Build in class
-1. Count dirt collected when tiles are mined.
-2. Spend one dirt when a new tile is placed.
-3. Craft one sword from three dirt when E is pressed.
+1. Start with a dirt counter, then track dirt, stone and wood separately. Grass drops dirt.
+2. Select dirt, stone or wood with 1, 2 or 3; place that material and spend one matching block.
+3. Craft one sword from three wood when E is pressed.
 4. Create one enemy with health and simple back-and-forth patrol.
 5. Draw the enemy and the inventory status.
 
 ## Checkpoint
-Collected resources are usable for building or crafting, and one enemy patrols the world.
+Collected materials keep their identity when placed, three wood makes a sword, and one enemy type patrols the world. The reference game spawns several instances of that type.
 
 ## Reference files
 `Inventory.java`, `Enemy.java`, plus inventory/keyboard/rendering sections of `SandboxGame.java`.
 
 ## Independent work
-Prepare to integrate an attack action and test enemies near blocks.
+Extend the dirt-counter example to stone and wood using the same pattern if unfinished in class. Prepare to integrate an attack action and test enemies near blocks.
+
+## Keep within two hours
+
+Use the supplied fixed terrain and textures. Teach one resource through the complete collect/place loop before generalising it. Keep the three counters visible as text; a full inventory screen and additional recipes remain optional.

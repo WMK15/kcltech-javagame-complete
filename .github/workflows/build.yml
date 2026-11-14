@@ -5,6 +5,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: ['.', 'workshops/workshop-01', 'workshops/workshop-02', 'workshops/workshop-03', 'workshops/workshop-04']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -13,4 +16,4 @@ jobs:
           java-version: '21'
           cache: maven
       - name: Compile and test
-        run: mvn --batch-mode verify
+        run: mvn --batch-mode --file ${{ matrix.project }}/pom.xml verify
