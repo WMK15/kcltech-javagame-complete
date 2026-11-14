@@ -9,6 +9,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -20,6 +21,9 @@ import static uk.ac.kcltech.sandbox.GameConfig.*;
 /** Complete reference implementation for the four-workshop Academy series. */
 public final class SandboxGame extends Application {
     private final World world = new World();
+    private final GameArt art = new GameArt();
+    private double elapsed;
+    private double lastRenderedPlayerX = Double.NaN;
     private final Player player = new Player();
     private final Inventory inventory = new Inventory();
     private final Enemy enemy = new Enemy(18 * TILE);
@@ -94,6 +98,7 @@ public final class SandboxGame extends Application {
         boolean right = pressed.contains(KeyCode.D) || pressed.contains(KeyCode.RIGHT);
         boolean jump = pressed.contains(KeyCode.SPACE) || pressed.contains(KeyCode.W) || pressed.contains(KeyCode.UP);
         player.update(world, dt, left, right, jump);
+        elapsed += dt;
         enemy.update(world, dt);
         statusSeconds = Math.max(0, statusSeconds - dt);
         cameraX = Math.max(0, Math.min(COLUMNS * TILE - WIDTH,
@@ -113,39 +118,44 @@ public final class SandboxGame extends Application {
     }
 
     private void render(GraphicsContext g) {
-        g.setFill(Color.web("#a6dfff"));
-        g.fillRect(0, 0, WIDTH, HEIGHT);
+        g.setImageSmoothing(false);
+        for (int screenY = 0; screenY < HEIGHT; screenY += TILE) {
+            for (int screenX = 0; screenX < WIDTH; screenX += TILE) {
+                g.drawImage(art.sky(), screenX, screenY, TILE, TILE);
+            }
+        }
         int firstColumn = Math.max(0, (int) Math.floor(cameraX / TILE));
         int lastColumn = Math.min(COLUMNS - 1, firstColumn + WIDTH / TILE + 1);
         for (int row = 0; row < ROWS; row++) {
             for (int column = firstColumn; column <= lastColumn; column++) {
                 World.Tile tile = world.get(column, row);
                 if (tile == World.Tile.AIR) continue;
-                double x = column * TILE - cameraX;
-                double y = row * TILE;
-                g.setFill(tile == World.Tile.GRASS ? Color.web("#539b50") : Color.web("#98683e"));
-                g.fillRect(x, y, TILE, TILE);
-                g.setStroke(Color.web("#000000", 0.10));
-                g.strokeRect(x, y, TILE, TILE);
-                if (tile == World.Tile.GRASS) {
-                    g.setFill(Color.web("#7bcb67"));
-                    g.fillRect(x, y, TILE, 7);
-                }
+                Image texture = tile == World.Tile.GRASS ? art.grass() : art.dirt();
+                g.drawImage(texture, column * TILE - cameraX, row * TILE, TILE, TILE);
             }
         }
 
-        g.setFill(Color.web("#375dc7"));
-        g.fillRoundRect(player.x() - cameraX, player.y(), Player.WIDTH, Player.HEIGHT, 6, 6);
-        g.setFill(Color.WHITE);
-        g.fillRect(player.x() - cameraX + (player.facingRight() ? 16 : 5), player.y() + 10, 4, 4);
+        boolean moving = Math.abs(player.x() - lastRenderedPlayerX) > 0.1;
+        Image playerFrame = moving && (int) (elapsed * 7) % 2 == 0
+                ? art.playerStep() : art.playerIdle();
+        lastRenderedPlayerX = player.x();
+        if (!player.facingRight()) {
+            g.save();
+            g.translate(2 * (player.x() - cameraX) + Player.WIDTH, 0);
+            g.scale(-1, 1);
+        }
+        g.drawImage(playerFrame, player.x() - cameraX, player.y(), Player.WIDTH, Player.HEIGHT);
+        if (!player.facingRight()) g.restore();
 
         if (enemy.alive()) {
-            g.setFill(Color.web("#d95a61"));
-            g.fillRoundRect(enemy.x() - cameraX, enemy.y(), Enemy.WIDTH, Enemy.HEIGHT, 6, 6);
+            g.drawImage(art.enemy(), enemy.x() - cameraX, enemy.y(), Enemy.WIDTH, Enemy.HEIGHT);
             g.setFill(Color.web("#7f1829"));
             g.fillRect(enemy.x() - cameraX, enemy.y() - 8, Enemy.WIDTH * enemy.health() / 3.0, 4);
         }
 
+        if (inventory.hasSword()) {
+            g.drawImage(art.sword(), 720, 13, 34, 34);
+        }
         g.setFill(Color.web("#101827", 0.86));
         g.fillRoundRect(12, 12, 700, 76, 10, 10);
         g.setFill(Color.WHITE);
