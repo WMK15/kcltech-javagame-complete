@@ -1,6 +1,6 @@
 # KCL Tech Academy: Java Game Development
 
-A playable **2D Minecraft-inspired sandbox** built with **Java 21 + JavaFX**, for four two-hour teaching workshops. It uses simple coloured shapes rather than external assets or a game engine.
+A playable **2D Minecraft-inspired sandbox** built with **Java 21 + JavaFX**, for four two-hour teaching workshops. It uses a bundled CC0 pixel-art asset pack, with no separate downloads or game engine required.
 
 ## Run in IntelliJ IDEA
 
@@ -16,6 +16,10 @@ mvn clean javafx:run
 JavaFX is provided via Maven; no separate manual JavaFX SDK download is required. A desktop session with graphical display is required to run the game.
 
 Run tests with `mvn test`.
+
+## Included graphics
+
+All 12 PNG assets live in `src/main/resources/assets/` and are loaded by `GameArt`: terrain, sky, two player animation frames, enemy, sword and additional tile textures. See [asset catalogue and licence](ASSET_LICENSE.md).
 
 ## Controls
 
@@ -43,6 +47,7 @@ This repo contains the **complete instructor/reference implementation**. To teac
 
 ## Code map
 
+- `GameArt`: pixel-art resource loading.
 - `SandboxGame`: JavaFX window, game loop, input handling, rendering, HUD and integration.
 - `World`: tile grid, mining, placing and tile collision.
 - `Player`: movement, gravity, jumping and collision.
