@@ -45,3 +45,7 @@ Use the Workshop 1 checkpoint as the starting reference and this project as the 
 - Decide which information a resource counter must preserve when a block is mined.
 
 Compare your project with `../workshop-03` after attempting resource collection in the next session.
+
+## Course use
+
+This is KCL Tech Academy teaching material for course participants and facilitators. It is not an open-source project and does not accept external contributions. The [course licensing notice](https://github.com/WMK15/kcltech-javagame-complete/blob/main/LICENSING.md) applies to the code and teaching materials; a copy is included in workshop ZIPs. The separate CC0 artwork terms remain in [ASSET_LICENSE.md](ASSET_LICENSE.md).

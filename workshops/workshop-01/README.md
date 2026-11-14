@@ -64,3 +64,7 @@ This is an end-of-session reference, so students can compare it with their own i
 - If JavaFX classes are missing, reload Maven and launch with `javafx:run`.
 - If compilation reports an unsupported Java release, select JDK 21 or later for both the project and Maven runner.
 - If no game window opens in a headless environment, run on a graphical desktop. Unit tests exercise movement and the world without opening JavaFX.
+
+## Course use
+
+This is KCL Tech Academy teaching material for course participants and facilitators. It is not an open-source project and does not accept external contributions. The [course licensing notice](https://github.com/WMK15/kcltech-javagame-complete/blob/main/LICENSING.md) applies to the code and teaching materials; a copy is included in workshop ZIPs. The separate CC0 artwork terms remain in [ASSET_LICENSE.md](ASSET_LICENSE.md).

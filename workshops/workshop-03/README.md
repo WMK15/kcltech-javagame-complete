@@ -62,4 +62,8 @@ Use the bundled fixed map, artwork and rendering code to keep the session focuse
 - `Collision`: rectangle overlap used to reject occupied placements.
 - `GameConfig`, `GameArt`: constants and bundled asset loading.
 
-This folder is self-contained and can be copied or zipped independently. See [asset provenance](ASSET_LICENSE.md).
+This folder is self-contained and can be copied or zipped independently for the Academy course use described below. See [asset provenance](ASSET_LICENSE.md).
+
+## Course use
+
+This is KCL Tech Academy teaching material for course participants and facilitators. It is not an open-source project and does not accept external contributions. The [course licensing notice](https://github.com/WMK15/kcltech-javagame-complete/blob/main/LICENSING.md) applies to the code and teaching materials; a copy is included in workshop ZIPs. The separate CC0 artwork terms remain in [ASSET_LICENSE.md](ASSET_LICENSE.md).

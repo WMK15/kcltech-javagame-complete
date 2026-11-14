@@ -16,7 +16,7 @@ mvn clean javafx:run
 mvn test
 ```
 
-The game needs a graphical desktop. Tests do not launch JavaFX. Assets and their [CC0 licence](ASSET_LICENSE.md) are bundled, so this folder can be copied and used independently.
+The game needs a graphical desktop. Tests do not launch JavaFX. This folder contains all required game assets and can be used independently for the Academy course use described below. See the separate [asset provenance and CC0 terms](ASSET_LICENSE.md).
 
 ## Controls
 
@@ -54,3 +54,7 @@ Demonstrate moving, jumping, mining a material, placing it, collecting three woo
 ## After the course
 
 The required deliverable is complete. Procedural terrain, extra recipes, more complex AI, an inventory screen, multiplayer and save/load are optional independent extensions, outside the eight-hour core series.
+
+## Course use
+
+This is KCL Tech Academy teaching material for course participants and facilitators. It is not an open-source project and does not accept external contributions. The [course licensing notice](https://github.com/WMK15/kcltech-javagame-complete/blob/main/LICENSING.md) applies to the code and teaching materials; a copy is included in workshop ZIPs. The separate CC0 artwork terms remain in [ASSET_LICENSE.md](ASSET_LICENSE.md).

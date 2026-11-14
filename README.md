@@ -1,6 +1,16 @@
+<p align="center">
+  <a href="https://www.kcltech.co.uk/">
+    <img src=".github/assets/kcl-tech-logo.jpg" alt="KCL Tech" width="480" />
+  </a>
+</p>
+
 # KCL Tech Academy: Java Game Development
 
+Course materials for **KCL Tech Academy**, the programming workshop programme run by [KCL Tech](https://www.kcltech.co.uk/) at King's College London.
+
 Four two-hour workshops build a playable **2D Minecraft-inspired sandbox** with **Java 21, JavaFX and IntelliJ IDEA**. Each workshop folder is an independent Maven project with its own source, tests, bundled artwork, asset licence and setup instructions.
+
+This repository is maintained for Academy participants and facilitators. **It is not an open-source project and is not accepting external contributions or pull requests.** Students should develop their own workshop projects and bring questions or corrections to their facilitators. See [LICENSING.md](LICENSING.md) for permitted course use and the separate artwork terms.
 
 ## Choose a workshop
 
@@ -45,11 +55,25 @@ mvn --file workshops/workshop-02/pom.xml test
 
 GitHub Actions runs the same root build with JDK 21. Tests exercise the game models without opening JavaFX windows.
 
-## Distribute the projects
+## Workshop handouts
 
-Run `./scripts/package-workshops.ps1` in PowerShell to generate four standalone ZIP files in `target/workshop-archives/`. Each archive includes source, tests, all 12 PNG assets, its asset licence and IntelliJ instructions. Build outputs and IDE settings are excluded. Recipients need JDK 21 and IntelliJ IDEA with Maven; the first import downloads dependencies.
+Facilitators can run `./scripts/package-workshops.ps1` in PowerShell to prepare four standalone ZIP files for Academy participants in `target/workshop-archives/`. Each archive includes source, tests, all 12 PNG assets, the asset notice, `LICENSING.md` and IntelliJ instructions. Build outputs and IDE settings are excluded. Participants need JDK 21 and IntelliJ IDEA with Maven; the first import downloads dependencies.
 
-Each workshop retains its own `ASSET_LICENSE.md` with the CC0 artwork's provenance, so copied or extracted projects keep their licence information.
+## Artwork and credits
+
+| Artwork | Source | Terms |
+| --- | --- | --- |
+| Terrain, block textures, sky and player animation frames (10 PNGs) | [WMK15/kcltech-java-game-sandbox](https://github.com/WMK15/kcltech-java-game-sandbox), the original workshop starter pack; see its [asset notice](https://github.com/WMK15/kcltech-java-game-sandbox/blob/86b38620dc7c2fc3febc0af6ba0080c711a85289/ASSET_LICENSE.md) | CC0 1.0 |
+| Slime enemy and sword (2 PNGs) | Additional sprites supplied with this reference game | CC0 1.0 |
+| KCL Tech logo | Original brand artwork from the KCL Tech website project | KCL Tech branding; not covered by the game assets' CC0 dedication |
+
+Each workshop includes its own asset file list and provenance: [Workshop 1](workshops/workshop-01/ASSET_LICENSE.md), [Workshop 2](workshops/workshop-02/ASSET_LICENSE.md), [Workshop 3](workshops/workshop-03/ASSET_LICENSE.md) and [Workshop 4](workshops/workshop-04/ASSET_LICENSE.md). The artwork's CC0 status does not license the course code, teaching materials or KCL Tech logo for general reuse.
+
+## Licensing and contributions
+
+The original course code and teaching materials are reserved for KCL Tech Academy use under [LICENSING.md](LICENSING.md). Participants and facilitators may run, study and adapt them for the course; wider reuse or redistribution requires permission. Existing CC0 asset terms and third-party software licences remain in force.
+
+This is a course reference repository, with changes maintained by the Academy team. It is not a community contribution project.
 
 ## Teaching scope
 
